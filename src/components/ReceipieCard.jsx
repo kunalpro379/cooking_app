@@ -5,7 +5,7 @@ const getTwoValuesFromArray = (arr) => {
   return [arr[0], arr[1]];
 };
 
-const RecipeCard = ({ recipe, bg, badge }) => {
+const RecipeCard = ({ recipe, bg = "bg-white", badge = "bg-orange-100" }) => {
   const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
@@ -16,7 +16,9 @@ const RecipeCard = ({ recipe, bg, badge }) => {
 
   const addRecipeToFavorites = () => {
     let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
-    const isRecipeAlreadyInFavorites = favorites.some((fav) => fav.label === recipe.label);
+    const isRecipeAlreadyInFavorites = favorites.some(
+      (fav) => fav.label === recipe.label
+    );
 
     if (isRecipeAlreadyInFavorites) {
       favorites = favorites.filter((fav) => fav.label !== recipe.label);
@@ -32,53 +34,62 @@ const RecipeCard = ({ recipe, bg, badge }) => {
   const healthLabels = getTwoValuesFromArray(recipe.healthLabels);
 
   return (
-    <div className={`flex flex-col rounded-md ${bg} overflow-hidden p-3 relative`}>
-      <a
-        href={`https://www.youtube.com/results?search_query=${recipe.label} recipe`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="relative h-32"
-      >
-        <div className="skeleton absolute inset-0" />
+    <div className={`${bg} rounded-xl shadow-lg overflow-hidden transition-transform duration-300 hover:scale-105`}>
+      <div className="relative">
+        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 transition-opacity duration-300 hover:opacity-100">
+          <Soup className="w-16 h-16 text-white" />
+        </div>
         <img
-          src={recipe.image}
-          alt="recipe img"
-          className="rounded-md w-full h-full object-cover cursor-pointer opacity-0 transition-opacity duration-500"
+          src={recipe.image || "/api/placeholder/400/300"}
+          alt={recipe.label}
+          className="w-full h-48 object-cover"
           onLoad={(e) => {
             e.currentTarget.style.opacity = 1;
             e.currentTarget.previousElementSibling.style.display = "none";
           }}
         />
-        <div className="absolute bottom-2 left-2 bg-white rounded-full p-1 cursor-pointer flex items-center gap-1 text-sm">
-          <Soup size={16} /> {recipe.yield} Servings
-        </div>
-
-        <div
-          className="absolute top-1 right-2 bg-white rounded-full p-1 cursor-pointer"
-          onClick={(e) => {
-            e.preventDefault();
-            addRecipeToFavorites();
-          }}
-        >
-          {!isFavorite && <Heart size={17} className="hover:fill-red-600 hover:text-red-500" />}
-          {isFavorite && <Heart size={17} className="fill-red-600 text-red-500" />}
-        </div>
-      </a>
-
-      <div className="flex mt-1">
-        <p className="font-bold tracking-wide">{recipe.label}</p>
       </div>
-      <p className="my-2">
-        {recipe.cuisineType[0].charAt(0).toUpperCase() + recipe.cuisineType[0].slice(1)} Kitchen
-      </p>
 
-      <div className="flex gap-2 mt-auto">
-        {healthLabels.map((label, idx) => (
-          <div key={idx} className={`flex gap-1 ${badge} items-center p-1 rounded-md`}>
-            <HeartPulse size={16} />
-            <span className="text-sm tracking-tighter font-semibold">{label}</span>
+      <div className="p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Soup className="w-5 h-5 text-orange-500" />
+            <span className="text-sm text-gray-600">{recipe.yield} Servings</span>
           </div>
-        ))}
+          <button
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
+            onClick={(e) => {
+              e.preventDefault();
+              addRecipeToFavorites();
+            }}
+          >
+            {!isFavorite && <Heart className="w-5 h-5 text-gray-600" />}
+            {isFavorite && <HeartPulse className="w-5 h-5 text-red-500" />}
+          </button>
+        </div>
+
+        <h3 className="text-xl font-semibold text-gray-800 line-clamp-2">
+          {recipe.label}
+        </h3>
+
+        <div className="flex items-center space-x-2">
+          <span className="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-600">
+            {recipe.cuisineType[0].charAt(0).toUpperCase() +
+              recipe.cuisineType[0].slice(1)}{" "}
+            Kitchen
+          </span>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {healthLabels.map((label, idx) => (
+            <span
+              key={idx}
+              className={`${badge} px-3 py-1 rounded-full text-sm text-orange-800`}
+            >
+              {label}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
